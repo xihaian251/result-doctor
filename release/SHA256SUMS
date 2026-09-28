@@ -1,0 +1,12 @@
+# Result Doctor 0.1.0 checksums
+#
+# PYPI VERIFIED - downloaded from files.pythonhosted.org on 2026-09-28 and re-hashed;
+# digests match the PyPI JSON API. These are the published identities.
+54b3ddd9a9831cbf08ce4ec0ce2e172eb061ba5ae58121048234c229281038fe  result_doctor-0.1.0-py3-none-any.whl
+e054b57cf1c3f12e41d7d28c1e7567e6b0368fa18033be1f1d630e845d2a7343  result_doctor-0.1.0.tar.gz
+
+# STAGED / NOT PUBLISHED - built locally (Windows) from the same commit bec3ab9 in a clean worktree.
+# Same content as above; differs only in newline encoding of generated metadata files
+# (see release/RELEASE_FREEZE_0.1.0.md section 3). Kept for build-reproducibility records only.
+ffc366a6e741e029ebc80715524bd26416e64ea69786d1e4a141c52cd3e4fb27  result_doctor-0.1.0-py3-none-any.whl  [staged]
+e5bfbe70d5cb71da03ea59aecac324d020645384270d0ec46ddc32686dd1a76c  result_doctor-0.1.0.tar.gz            [staged]
