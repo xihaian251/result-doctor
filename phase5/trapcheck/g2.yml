@@ -1,0 +1,118 @@
+# Phase 4 manifest as authored (byte snapshot for Phase 5 backward-compatibility check T2).
+schema_version: 1
+project: rtdl-revisiting-models
+root: "../../phase4/rtdl-revisiting-models"
+
+evidence:
+  - id: best-epoch
+    declared:
+      value: best
+      by: "the training script overwrites stats['metrics'] only on a new-best epoch"
+      statement: "the test metrics stored in stats.json are the metrics of best_epoch"
+    supported_by: {path: bin/mlp.py, line: 254, text: "best_epoch"}
+
+transformations:
+  - id: readme-render
+    target: "README aggregate column"
+    steps:
+      - step: format
+        stage: render
+        mode: fixed
+        digits: 3
+        applied_at: script
+        observed: {path: README.md, line: 73, text: ".round(3)"}
+
+candidate_sets:
+  - id: adult-tuning-trials
+    kind: hyperparameter
+    universe: partial
+    members: [output/adult/mlp/tuning/0/best.toml]
+    declared_size:
+      value: 100
+      statement: optimization trials
+      declared: {value: 100, statement: optimization trials, by: "the tuning config asks Optuna for 100 trials"}
+      supported_by: {path: output/adult/mlp/tuning/0.toml, line: 20, text: "n_trials = 100"}
+    surviving_size: {value: 1, statement: optimization trials, declared: {value: 1, statement: "only best.toml is kept in the repository"}}
+  - id: adult-epochs
+    kind: checkpoint
+    universe: unknown
+    statement: "the epochs of one training run; n_epochs is 1000000000 and patience is 16"
+
+selection_events:
+  - id: adult-tuned-config
+    kind: hyperparameter
+    over: adult-tuning-trials
+    chosen: output/adult/mlp/tuning/0/best.toml
+    criterion:
+      metric: {observed: {path: bin/tune.py, line: 131, text: "stats['metrics'][lib.VAL]['score']"}}
+      direction: {observed: {path: bin/tune.py, line: 178, text: "maximize"}}
+      split: {declared: {value: validation, by: "the objective returns the val part of the metrics"}}
+      scope: {declared: {value: "one search per dataset and model", by: author}}
+      tie_break: {unknown: "no tie rule is recorded in bin/tune.py"}
+      timing: {observed: {path: bin/tune.py, line: 192, text: "study.best_trial"}}
+  - id: per-run-epoch
+    kind: checkpoint
+    over: adult-epochs
+    chosen: {observed: {path: output/adult/mlp/tuned/0/stats.json, key: /best_epoch}}
+    criterion:
+      metric: {observed: {path: bin/mlp.py, line: 250, text: "progress.update"}}
+      direction: {unknown: "the comparison lives inside the third-party zero.ProgressTracker, not in this repository"}
+      split: {declared: {value: validation, by: "the value handed to progress.update is the val score"}}
+      scope: {declared: {value: per run, by: author}}
+      tie_break: {unknown: "not recorded"}
+      timing: {observed: {path: bin/mlp.py, line: 250, text: "progress.update"}}
+
+reported_results:
+  - label: mlp-tuned/adult
+    printed_in: {artifact: README.md, table: "README metrics snippet", row: adult, column: "metrics.test.score", quoted_text: "adult                 0.852"}
+    quantity: metrics.test.score
+    value: {observed: {path: README.md, line: 80, text: "0.852"}}
+    wording: {observed: {path: README.md, line: 70, text: "averaged over all random seeds"}}
+    steps: {ref: readme-render}
+    selection: [adult-tuned-config]
+    aggregate:
+      center: mean
+    member_rule: {kind: enumerated, declared: {value: enumerated, by: "the 15 seed runs listed here"}}
+    members:
+        - {name: seed-0, path: output/adult/mlp/tuned/0/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/0/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-1, path: output/adult/mlp/tuned/1/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/1/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-2, path: output/adult/mlp/tuned/2/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/2/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-3, path: output/adult/mlp/tuned/3/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/3/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-4, path: output/adult/mlp/tuned/4/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/4/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-5, path: output/adult/mlp/tuned/5/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/5/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-6, path: output/adult/mlp/tuned/6/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/6/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-7, path: output/adult/mlp/tuned/7/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/7/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-8, path: output/adult/mlp/tuned/8/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/8/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-9, path: output/adult/mlp/tuned/9/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/9/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-10, path: output/adult/mlp/tuned/10/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/10/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-11, path: output/adult/mlp/tuned/11/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/11/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-12, path: output/adult/mlp/tuned/12/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/12/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-13, path: output/adult/mlp/tuned/13/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/13/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+        - {name: seed-14, path: output/adult/mlp/tuned/14/stats.json, key: /metrics/test/score, identity: {observed: {path: output/adult/mlp/tuned/14/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+
+  - label: mlp-tuned/california_housing
+    printed_in: {artifact: README.md, table: "README metrics snippet", row: california_housing, column: "metrics.test.score", quoted_text: "california_housing   -0.499"}
+    quantity: metrics.test.score
+    value: {observed: {path: README.md, line: 82, text: "-0.499"}}
+    wording: {observed: {path: README.md, line: 70, text: "averaged over all random seeds"}}
+    steps: {ref: readme-render}
+    aggregate:
+      center: mean
+    member_rule: {kind: enumerated, declared: {value: enumerated, by: "the 15 seed runs listed here"}}
+    members:
+      - {name: seed-0, path: output/california_housing/mlp/tuned/0/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/0/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-1, path: output/california_housing/mlp/tuned/1/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/1/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-2, path: output/california_housing/mlp/tuned/2/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/2/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-3, path: output/california_housing/mlp/tuned/3/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/3/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-4, path: output/california_housing/mlp/tuned/4/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/4/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-5, path: output/california_housing/mlp/tuned/5/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/5/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-6, path: output/california_housing/mlp/tuned/6/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/6/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-7, path: output/california_housing/mlp/tuned/7/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/7/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-8, path: output/california_housing/mlp/tuned/8/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/8/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-9, path: output/california_housing/mlp/tuned/9/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/9/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-10, path: output/california_housing/mlp/tuned/10/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/10/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-11, path: output/california_housing/mlp/tuned/11/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/11/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-12, path: output/california_housing/mlp/tuned/12/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/12/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-13, path: output/california_housing/mlp/tuned/13/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/13/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+      - {name: seed-14, path: output/california_housing/mlp/tuned/14/stats.json, key: /metrics/test/score, identity: {observed: {path: output/california_housing/mlp/tuned/14/stats.json, key: /config/seed}}, selector: {kind: best, via: best-epoch}}
+

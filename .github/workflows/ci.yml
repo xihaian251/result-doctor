@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # The Phase 4 pilot is upstream code, so it is not vendored; without it the pilot test skips.
+      # Rebuilding it here lets CI run the frozen 16-finding acceptance. See phase4/PILOT_CHECKOUT.md.
+      - name: Materialise the pinned pilot checkout
+        run: |
+          set -o pipefail
+          if git clone --quiet https://github.com/yandex-research/rtdl-revisiting-models.git /tmp/pilot \
+             && git -C /tmp/pilot checkout --quiet e3ed46cac38568785289d8fa16b8cfa585bde27e; then
+            mkdir -p phase4/rtdl-revisiting-models
+            tar -C /tmp/pilot --exclude .git -cf - . | tar -C phase4/rtdl-revisiting-models -xf -
+          else
+            echo "::warning::upstream pilot unavailable - the Phase 4 acceptance test will skip"
+          fi
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]" build
+
+      - name: ruff check
+        run: ruff check .
+
+      - name: ruff format --check
+        run: ruff format --check .
+
+      - name: mypy
+        run: mypy
+
+      - name: pytest
+        run: pytest -q
+
+      - name: build
+        run: python -m build
+
+      - name: install the wheel and audit the pilot
+        run: |
+          python -m venv .verify
+          .verify/bin/pip install --quiet dist/result_doctor-*-py3-none-any.whl
+          .verify/bin/pip check
+          .verify/bin/result-doctor --version
+          .verify/bin/result-doctor audit phase4/rtdl-revisiting-models/result-doctor.yml

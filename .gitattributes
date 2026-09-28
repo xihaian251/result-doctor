@@ -1,0 +1,7 @@
+# The reported result is a byte-identical canonical JSON report. Fixture bytes must not depend
+# on which operating system cloned the repository, so text is always checked out with LF.
+* text=auto eol=lf
+
+# Placeholders standing in for binary artifacts the audit only names, never parses.
+*.pt binary
+*.ckpt binary

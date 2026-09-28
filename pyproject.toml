@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "result-doctor"
+dynamic = ["version"]
+description = "Deterministic audits of how a reported ML result was produced"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = ["PyYAML>=6"]
+
+[project.scripts]
+result-doctor = "result_doctor.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff", "mypy"]
+
+# One version literal, read from `result_doctor.__version__` at build time. Before this,
+# pyproject and `__init__.py` each pinned `0.1.dev0` independently and README a third.
+[tool.setuptools.dynamic]
+version = {attr = "result_doctor.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+# `ruff format` is the adopted formatter. The only layout exception is the pair of
+# `# fmt: off/on` markers around the transcribed paper cells, which must stay one-per-line
+# so each entry can be read against the printed table.
+# The generic fixtures are data, not source: `example_b/train.py` is a deliberate excerpt
+# whose line numbers the manifest quotes, so linting or formatting it would break the very
+# locators the acceptance cases depend on. The `phaseN/` directories are likewise evidence:
+# upstream checkouts and transcribed manifests that the acceptance runs read verbatim.
+extend-exclude = ["tests/generic_fixtures", "phase*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+# `(str, Enum)` is deliberate: `canonical_json` serializes through `.value` explicitly,
+# and StrEnum would change what `str(status)` prints in a finding.
+ignore = ["UP042"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/result_doctor"]
+ignore_missing_imports = true

@@ -1,0 +1,44 @@
+# G5 / 外部产物不可访问: the comparison set spans this project's own cell and a baseline
+# published elsewhere. The external product is not under `root` and is not referenced by
+# any cell, so nothing about it may be invented: RD007 stops at INCONCLUSIVE with the
+# gap recorded (Phase 2 §23 G5, §18).
+schema_version: 1
+project: tiny-demo-external
+root: .
+
+reported_results:
+  - label: acc/ours
+    printed_in: {table: "Table 4", row: Ours, column: Acc, quoted_text: "81.00 ± 1.41"}
+    quantity: acc/ours
+    metric_name: {declared: {value: test accuracy, by: author}}
+    value: {observed: {path: paper/table4.txt, line: 6, text: "81.00 ± 1.41"}}
+    spread: {kind: std, ddof: 1, k: 1}
+    wording: {observed: {path: paper/table4.txt, line: 3, text: "mean ± standard deviation over 2 runs"}}
+    aggregate: {center: mean}
+    members:
+      - name: run-a
+        path: runs/a/log.csv
+        column: test_acc
+        row: last
+        identity: {declared: {value: run-a, by: author}}
+      - name: run-b
+        path: runs/b/log.csv
+        column: test_acc
+        row: last
+        identity: {declared: {value: run-b, by: author}}
+    member_rule:
+      kind: enumerated
+      statement: these two runs are the reported mean
+      declared: {value: enumerated, by: author}
+    steps:
+      - {step: format, stage: render, mode: fixed, digits: 2, applied_at: manual}
+
+comparisons:
+  - id: table4
+    over: [acc/ours, external/eqnet]
+    origin: {unknown: "external/eqnet is a baseline published in another paper, not in this root"}
+    marks:
+      declared: {value: [acc/ours], by: author}
+      supported_by: {path: paper/table4.txt, line: 6, text: "Ours"}
+    marks_derivation: {declared: {value: [acc/ours], by: author, statement: "bold the higher accuracy"}}
+    rule: {expression: "bold iff strictly greater than every peer", operator: ">", symmetric: true, k_factor: 1}

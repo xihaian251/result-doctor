@@ -1,0 +1,7 @@
+Table 2  CIFAR-10 classification accuracy
+
+mean ± standard error over 3 seeds
+
+Model        Acc
+ResNet-18    91.02 ± 0.35
+ResNet-20    94.12 ± 0.20

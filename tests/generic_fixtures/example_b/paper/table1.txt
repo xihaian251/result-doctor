@@ -1,0 +1,6 @@
+Table 1  Accuracy on CIFAR-10
+
+mean over the three runs
+Model        Acc
+Ours       **91.4**
+Other       90.8

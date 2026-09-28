@@ -1,0 +1,39 @@
+# G4 / 声明不一致: the only difference from G1 is that the +/- is declared to be a
+# standard error while the published value is reproduced by a plain (ddof=0) standard
+# deviation. RD005 must FAIL on that contradiction and RD001 must still PASS: a wording
+# declaration never upgrades or downgrades the recomputation (Phase 2 §23 G4).
+schema_version: 1
+project: tiny-demo-wording
+root: .
+
+reported_results:
+  - label: acc/cifar-resnet20
+    printed_in: {table: "Table 2", row: ResNet-20, column: Acc, quoted_text: "94.12 ± 0.20"}
+    quantity: acc/cifar-resnet20
+    metric_name: {declared: {value: test accuracy, by: author}}
+    value: {observed: {path: paper/table2.txt, line: 7, text: "94.12 ± 0.20"}}
+    spread: {kind: std, ddof: 0, k: 1}
+    wording: {declared: {value: standard error, by: author}}
+    aggregate: {center: mean}
+    members:
+      - name: seed-a
+        path: runs/a/log.csv
+        column: test_acc
+        row: last
+        identity: {declared: {value: run-a, by: author}}
+      - name: seed-b
+        path: runs/b/log.csv
+        column: test_acc
+        row: last
+        identity: {declared: {value: run-b, by: author}}
+      - name: seed-c
+        path: runs/c/log.csv
+        column: test_acc
+        row: last
+        identity: {declared: {value: run-c, by: author}}
+    member_rule:
+      kind: enumerated
+      statement: these three runs are the reported mean
+      declared: {value: enumerated, by: author}
+    steps:
+      - {step: format, stage: render, mode: fixed, digits: 2, applied_at: manual}

@@ -1,0 +1,45 @@
+# Phase 2 §20 Example A, as a real test input (G1 / minimal generic project).
+#
+# Two spellings differ from the design document, both registered in
+# phase3/RESULT_DOCTOR_PHASE3_REPORT.md §13: every member declares its run identity,
+# because RD002 can only PASS once a member is bindable; and the printed cell is read
+# with a `text:` fragment rather than a `key: "text:..."` string.
+schema_version: 1
+project: tiny-demo
+root: .
+
+reported_results:
+  - label: acc/cifar-resnet20
+    printed_in: {table: "Table 2", row: ResNet-20, column: Acc, quoted_text: "94.12 ± 0.24"}
+    quantity: acc/cifar-resnet20
+    metric_name: {declared: {value: test accuracy, by: author}}
+    value: {observed: {path: paper/table2.txt, line: 7, text: "94.12 ± 0.24"}}
+    spread: {kind: std, ddof: 1, k: 1}
+    wording:
+      observed:
+        path: paper/table2.txt
+        line: 3
+        text: "mean ± standard deviation over 3 seeds"
+    aggregate: {center: mean}
+    members:
+      - name: seed-a
+        path: runs/a/log.csv
+        column: test_acc
+        row: last
+        identity: {declared: {value: run-a, by: author}}
+      - name: seed-b
+        path: runs/b/log.csv
+        column: test_acc
+        row: last
+        identity: {declared: {value: run-b, by: author}}
+      - name: seed-c
+        path: runs/c/log.csv
+        column: test_acc
+        row: last
+        identity: {declared: {value: run-c, by: author}}
+    member_rule:
+      kind: enumerated
+      statement: these three runs are the reported mean
+      declared: {value: enumerated, by: author}
+    steps:
+      - {step: format, stage: render, mode: fixed, digits: 2, applied_at: manual}

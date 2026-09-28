@@ -1,0 +1,6 @@
+Table 4  CIFAR-10, our own runs only
+
+mean ± standard deviation over 2 runs
+
+Model          Acc
+Ours           81.00 ± 1.41

@@ -1,0 +1,23 @@
+# G2 / 证据不全: Example A with `member_rule` and `wording` removed and the member values
+# authored inline. Everything that is not stated stays UNKNOWN, and the manifest still
+# loads (Phase 2 §12: insufficient evidence is never a parser error).
+schema_version: 1
+project: tiny-demo-partial
+root: .
+
+reported_results:
+  - label: acc/cifar-resnet20
+    printed_in: {table: "Table 2", row: ResNet-20, column: Acc, quoted_text: "94.30 ± 0.50"}
+    quantity: acc/cifar-resnet20
+    value: {observed: {path: paper/table2.txt, line: 7, text: "94.30 ± 0.50"}}
+    spread: {kind: std, ddof: 1, k: 1}
+    aggregate: {center: mean}
+    members:
+      - name: seed-a
+        value: {declared: {value: 93.85, by: author}}
+      - name: seed-b
+        value: {declared: {value: 94.20, by: author}}
+      - name: seed-c
+        value: {declared: {value: 94.31, by: author}}
+    steps:
+      - {step: format, stage: render, mode: fixed, digits: 2, applied_at: manual}

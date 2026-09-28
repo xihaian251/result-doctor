@@ -1,0 +1,86 @@
+# Phase 2 §20 Example B, as a real test input. The adaptations needed to make it load are
+# all format-level and are registered in phase3/RESULT_DOCTOR_PHASE3_REPORT.md §13:
+# a printed cell is authored as `value:`, a mark list is authored rather than observed,
+# `direction` states min*/max* with the code line as its support, and a member value needs
+# a locator (`line:`) while the `best` claim stays a declaration.
+schema_version: 1
+project: tiny-demo-with-ckpt
+root: .
+
+reported_results:
+  - label: acc/x
+    printed_in: {table: "Table 1", row: A, column: Acc, quoted_text: "91.4"}
+    value: {declared: {value: "91.4", by: author, statement: "the paper prints 91.4"}}
+    aggregate: {center: mean}
+    members:
+      - name: r1
+        path: ckpt/r1/test_acc.txt
+        line: 1
+        selector: {kind: best, declared: {value: best, by: author}}
+        identity: {declared: {value: run-r1, by: author}}
+      - name: r2
+        path: ckpt/r2/test_acc.txt
+        line: 1
+        selector: {kind: best, declared: {value: best, by: author}}
+        identity: {declared: {value: run-r2, by: author}}
+      - name: r3
+        path: ckpt/r3/test_acc.txt
+        line: 1
+        selector: {kind: best, declared: {value: best, by: author}}
+        identity: {declared: {value: run-r3, by: author}}
+    member_rule:
+      kind: enumerated
+      declared: {value: enumerated, by: author}
+    steps:
+      - {step: scale, factor: 100, stage: member, applied_at: script}
+      - {step: format, stage: render, mode: fixed, digits: 1, applied_at: manual}
+
+  - label: acc/y
+    printed_in: {table: "Table 1", row: B, column: Acc, quoted_text: "90.8"}
+    value: {declared: {value: "90.8", by: author}}
+    aggregate: {center: mean}
+    members:
+      - name: s1
+        value: {declared: {value: 90.6, by: author}}
+        identity: {declared: {value: run-s1, by: author}}
+      - name: s2
+        value: {declared: {value: 90.9, by: author}}
+        identity: {declared: {value: run-s2, by: author}}
+      - name: s3
+        value: {declared: {value: 91.0, by: author}}
+        identity: {declared: {value: run-s3, by: author}}
+    member_rule:
+      kind: enumerated
+      declared: {value: enumerated, by: author}
+    steps:
+      - {step: format, stage: render, mode: fixed, digits: 1, applied_at: manual}
+
+candidate_sets:
+  - kind: checkpoint
+    members: [ckpt/r1/ep10.pt, ckpt/r1/ep20.pt, ckpt/r1/ep30.pt, ckpt/r2/ep10.pt, "..."]
+    universe: complete
+    universe_evidence:
+      observed: {path: train.py, line: 88, text: "for epoch in range(30)"}
+
+selection_events:
+  - kind: checkpoint
+    over: 0
+    chosen: ckpt/r1/ep30.pt
+    values: {observed: {path: ckpt/r1/val.json, key: /acc}}
+    criterion:
+      metric:    {observed: {path: train.py, line: 96, text: "val_acc"}}
+      split:     {declared: {value: validation, by: author, statement: "validation split"}}
+      direction:
+        declared: {value: maximize, by: author}
+        supported_by: {path: train.py, line: 97, text: "if val_acc > best"}
+      scope:     {declared: {value: per run, by: author}}
+      tie_break: {unknown: "no tie rule is recorded"}
+      timing:    {observed: {path: train.py, line: 97, text: "in training loop"}}
+
+comparisons:
+  - over: [acc/x, acc/y]
+    marks:
+      declared: {value: [acc/x], by: author}
+      supported_by: {path: paper/table1.txt, line: 5, text: "**91.4**"}
+    marks_derivation: {declared: {value: [acc/x], by: author, statement: "bold the best row"}}
+    rule: {expression: "bold iff strictly greater than every peer", operator: ">", symmetric: true, k_factor: 1}
